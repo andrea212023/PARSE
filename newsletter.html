@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARSE Newsletter - Volume 1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', system-ui, sans-serif; background: #f0edf5; color: #1a1a2e; line-height: 1.7; }
+
+  .newsletter {
+    max-width: 680px; margin: 32px auto; background: white;
+    border-radius: 4px; overflow: hidden;
+  }
+
+  /* HEADER */
+  .nl-header {
+    padding: 32px 40px 0;
+    font-size: 0.78rem; font-weight: 600; font-style: italic;
+    letter-spacing: 2px; text-transform: uppercase; color: #6b6b85;
+    border-bottom: 2px solid #1a1a2e; margin-left: 40px; margin-right: 40px;
+    padding-left: 0; padding-right: 0; padding-bottom: 10px;
+  }
+
+  /* EDITOR ROW */
+  .editor-row {
+    display: flex; gap: 28px; align-items: flex-start;
+    padding: 28px 40px 24px;
+  }
+  .logo-block { flex: 0 0 220px; }
+  .logo-svg { width: 200px; height: auto; }
+  .editor-block { flex: 1; }
+  .editor-label {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #6b6b85; margin-bottom: 8px;
+  }
+  .editor-text { font-size: 0.88rem; color: #444; line-height: 1.65; }
+
+  /* SECTIONS */
+  .nl-section { padding: 0 40px 24px; }
+  .section-title {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #1a1a2e; margin-bottom: 12px;
+    border-bottom: 1px solid #e8e6f0; padding-bottom: 6px;
+  }
+  .section-title span { color: #6b6b85; font-weight: 500; }
+
+  .update-list { list-style: disc; padding-left: 20px; margin-bottom: 0; }
+  .update-list li { font-size: 0.88rem; color: #444; margin-bottom: 6px; }
+  .update-list li strong { color: #1a1a2e; }
+
+  /* FOCUS */
+  .focus-label {
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: #6b6b85; margin-bottom: 4px;
+  }
+  .focus-title {
+    font-size: 1.35rem; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase; color: #1a1a2e; margin-bottom: 16px;
+    line-height: 1.3;
+  }
+  .focus-text { font-size: 0.88rem; color: #444; line-height: 1.7; margin-bottom: 10px; }
+
+  /* BOTTOM COLUMNS */
+  .bottom-row {
+    display: flex; gap: 0; padding: 0 40px 28px;
+  }
+  .bottom-col {
+    flex: 1; padding: 16px 20px;
+    border: 1px solid #e8e6f0; border-radius: 0;
+  }
+  .bottom-col:first-child { border-right: none; }
+  .bottom-col-title {
+    font-size: 0.72rem; font-weight: 800; letter-spacing: 1.5px;
+    text-transform: uppercase; color: #00BF63; margin-bottom: 12px;
+    background: #e6f9ef; display: inline-block; padding: 3px 10px;
+    border-radius: 3px;
+  }
+  .bottom-col p {
+    font-size: 0.85rem; color: #444; font-style: italic; margin-bottom: 8px;
+  }
+  .bottom-col ul {
+    list-style: disc; padding-left: 18px; font-size: 0.85rem; color: #444;
+  }
+  .bottom-col ul li { margin-bottom: 4px; }
+  .bottom-col ul li strong { color: #1a1a2e; font-style: normal; }
+
+  /* FOOTER */
+  .nl-footer {
+    padding: 20px 40px; border-top: 1px solid #e8e6f0;
+    font-size: 0.78rem; color: #6b6b85; line-height: 1.6;
+  }
+  .nl-footer a { color: #00BF63; text-decoration: underline; font-weight: 600; }
+  .nl-footer .unsub { font-style: italic; margin-top: 4px; font-size: 0.75rem; }
+
+  @media (max-width: 600px) {
+    .newsletter { margin: 0; border-radius: 0; }
+    .nl-header, .nl-section, .bottom-row, .nl-footer { padding-left: 20px; padding-right: 20px; }
+    .nl-header { margin-left: 20px; margin-right: 20px; }
+    .editor-row { flex-direction: column; padding-left: 20px; padding-right: 20px; }
+    .logo-block { flex: none; }
+    .bottom-row { flex-direction: column; }
+    .bottom-col:first-child { border-right: 1px solid #e8e6f0; border-bottom: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="newsletter">
+
+  <div class="nl-header">Newsletter - Volume 1 - September 2026</div>
+
+  <div class="editor-row">
+    <div class="logo-block">
+      <!-- PARSE logo as inline SVG -->
+      <svg class="logo-svg" viewBox="0 0 260 80" xmlns="http://www.w3.org/2000/svg">
+        <!-- Scales icon -->
+        <circle cx="30" cy="18" r="4" fill="#00BF63"/>
+        <line x1="30" y1="22" x2="30" y2="55" stroke="#00BF63" stroke-width="2"/>
+        <line x1="12" y1="30" x2="48" y2="30" stroke="#00BF63" stroke-width="2"/>
+        <path d="M12 30 L8 45 L20 45 Z" fill="none" stroke="#00BF63" stroke-width="1.5" stroke-linejoin="round"/>
+        <path d="M48 30 L44 45 L56 45 Z" fill="none" stroke="#00BF63" stroke-width="1.5" stroke-linejoin="round"/>
+        <line x1="20" y1="55" x2="40" y2="55" stroke="#00BF63" stroke-width="2"/>
+        <!-- PARSE text -->
+        <text x="68" y="48" font-family="Inter, sans-serif" font-size="36" font-weight="800" fill="#1a1a2e">PARSE</text>
+        <!-- Heartbeat line -->
+        <polyline points="195,40 205,40 210,25 215,55 220,35 225,45 235,40 250,40" fill="none" stroke="#00BF63" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+    <div class="editor-block">
+      <div class="editor-label">Editor's note:</div>
+      <div class="editor-text">This first newsletter marks the launch of PARSE. The goal stays simple: field medical staff should be able to use AI without having to choose between operational efficiency and patient safety.</div>
+    </div>
+  </div>
+
+  <div class="nl-section">
+    <div class="section-title">Protocol's updates <span>(v0.11)</span></div>
+    <ul class="update-list">
+      <li><strong>5 sensitivity tiers defined</strong>: from public aggregate data (tier 1) to protection-sensitive information (tier 4).</li>
+      <li><strong>3 LLM architectures mapped</strong>: defining what data an AI system can access and where.</li>
+      <li><strong>5 conflict-specific bias mechanisms identified</strong>: including survivorship bias, temporal shifts, and the protected-attribute paradox.</li>
+    </ul>
+  </div>
+
+  <div class="nl-section">
+    <div class="focus-label">This month's focus :</div>
+    <div class="focus-title">When the data you need is the data you shouldn't collect</div>
+    <p class="focus-text">Imagine you are using an AI system to analyse health data in a conflict setting. You want to know whether certain populations are systematically underrepresented.</p>
+    <p class="focus-text">You might need information about ethnicity, origin, or affiliation. But collecting or storing these attributes can itself create a security risk. In a conflict zone, sensitive data is not simply a privacy concern: if it leaks, it can put patients or healthcare facilities at risk.</p>
+    <p class="focus-text">This creates a difficult paradox: how can we detect unfairness without collecting information that could endanger the people we are trying to protect?</p>
+    <p class="focus-text">PARSE addresses this by asking not only what is in the data, but what is missing and why. People may be absent because they could not reach a health facility, were displaced, or were never included in the reporting system.</p>
+  </div>
+
+  <div class="bottom-row">
+    <div class="bottom-col">
+      <div class="bottom-col-title">Question from the field</div>
+      <p><em>Can I use a LLM to help with a difficult case without sharing the patient?</em></p>
+      <p>Give it the clinical pattern, not the person behind it...</p>
+    </div>
+    <div class="bottom-col">
+      <div class="bottom-col-title">Useful resources</div>
+      <ul>
+        <li><strong>Our podcast, Episode 1:</strong> What not to send to AI</li>
+        <li><strong>Protocol decision tree</strong></li>
+        <li><a href="https://github.com/jmiao24/Paper2Agent" target="_blank" style="color:#00BF63;font-weight:600">Paper2Agent</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="nl-footer">
+    <a href="mailto:andrianna.kis@learningplanetinstitute.org">Contact us</a> - <a href="protocol.html">Read the protocol</a> - <a href="#" onclick="document.getElementById('subscribe-box').style.display='flex';this.style.display='none';return false;">Subscribe</a>
+    <div id="subscribe-box" style="display:none;margin-top:10px;gap:8px;align-items:center">
+      <input type="email" id="sub-email" placeholder="Your email" style="flex:1;padding:6px 12px;border:1px solid #e8e6f0;border-radius:4px;font-family:Inter,sans-serif;font-size:0.82rem;outline:none">
+      <a href="#" onclick="var e=document.getElementById('sub-email').value;if(e){window.location.href='mailto:andrianna.kis@learningplanetinstitute.org?subject=PARSE%20Newsletter%20Subscribe&body=Please%20add%20me%20to%20the%20newsletter:%20'+encodeURIComponent(e)}return false;" style="padding:6px 14px;background:#00BF63;color:white;border-radius:4px;text-decoration:none;font-size:0.82rem;font-weight:600;white-space:nowrap">Subscribe</a>
+    </div>
+    <div class="unsub">You're receiving this email because you follow the PARSE project. <a href="mailto:andrianna.kis@learningplanetinstitute.org?subject=Unsubscribe%20from%20PARSE">Unsubscribe</a> anytime.</div>
+  </div>
+
+</div>
+
+</body>
+</html>
