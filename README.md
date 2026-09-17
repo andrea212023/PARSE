@@ -23,15 +23,15 @@ PARSE is a protocol and training framework for medical professionals, coordinato
 - **7 MOOC-style video scenarios** for training
 
 ## Repository structure
-PARSE/
-  protocol/            Protocol document
-  tools/
-    deid-checker/      De-identification checker (HTML)
-    nlp/               Topic modelling notebook
-  website/             Interactive protocol site
-  newsletter/          Newsletter template
-  diagrams/            Decision flowchart, project workflow
-  proposal/            Project proposal document
+| Folder | Contents |
+|--------|----------|
+| `protocol/` | Protocol document |
+| `tools/deid-checker/` | De-identification checker (HTML, works offline) |
+| `tools/nlp/` | Topic modelling notebook |
+| `website/` | Interactive protocol site |
+| `newsletter/` | Newsletter template |
+| `diagrams/` | Decision flowchart, project workflow |
+| `proposal/` | Project proposal document |
 
 ## Keywords
 
