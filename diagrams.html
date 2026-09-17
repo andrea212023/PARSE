@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARSE - Diagrams</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #8C52FF; --purple-soft: #f0e8ff;
+    --green: #00BF63; --green-soft: #e6f9ef;
+    --orange: #e67e00; --red: #d32f2f;
+    --text: #1a1a2e; --muted: #6b6b85; --bg: #fafafe; --card: #ffffff; --border: #e8e6f0;
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+
+  .top-bar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 32px; border-bottom: 1px solid var(--border); background: white;
+  }
+  .top-bar-logo {
+    font-size: 1.4rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--purple), var(--green));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .top-bar a {
+    font-size: 0.82rem; color: var(--purple); text-decoration: none; font-weight: 600;
+  }
+  .top-bar a:hover { text-decoration: underline; }
+
+  .content { max-width: 960px; margin: 0 auto; padding: 40px 32px 80px; }
+
+  h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 8px; }
+  .subtitle { font-size: 0.92rem; color: var(--muted); margin-bottom: 40px; }
+
+  .diagram-section { margin-bottom: 56px; }
+  .diagram-label {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--purple); margin-bottom: 6px;
+  }
+  .diagram-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; }
+
+  .diagram-card {
+    background: white; border: 1px solid var(--border); border-radius: 10px;
+    padding: 32px 24px; overflow-x: auto;
+  }
+  .diagram-card pre.mermaid {
+    margin: 0; font-size: 14px;
+  }
+
+  .diagram-note {
+    margin-top: 12px; font-size: 0.82rem; color: var(--muted); line-height: 1.5;
+    padding-left: 16px; border-left: 2px solid var(--border);
+  }
+
+  @media (max-width: 768px) {
+    .content { padding: 24px 16px 60px; }
+    .diagram-card { padding: 16px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-logo">&#9670; PARSE</div>
+  <a href="index.html">&#8592; Back to main site</a>
+</div>
+
+<div class="content">
+  <h1>Diagrams</h1>
+  <p class="subtitle">Visual reference for the PARSE protocol decision flows and project structure.</p>
+
+  <!-- DECISION TREE -->
+  <div class="diagram-section">
+    <div class="diagram-label">Decision flow</div>
+    <div class="diagram-title">LLM Use Decision Tree</div>
+    <div class="diagram-card">
+      <pre class="mermaid">
+flowchart LR
+   START["START\nLLM + org data"] --> Q1{"Patient-level\ndata?"} & Q5{"Public data\nonly?"}
+   Q1 -- YES --> Q2{"De-identifiable?"}
+   Q1 -- NO --> Q4{"Data tier?"}
+   Q2 -- YES --> AB["Arch B - De-identify - Zero-retention API"]
+   Q2 -- NO --> Q3{"Local model\navailable?"}
+   Q3 -- YES --> AC["Arch C - Local model - Data stays on-site"]
+   Q3 -- NO --> AA["Arch A - LLM makes tools - You run locally"]
+   Q4 -- Tier 0-1 --> T01["Commercial API permitted"]
+   Q4 -- Tier 2 --> T2["Arch B - De-identify - Zero-retention API"]
+   Q4 -- Tier 3 --> T3["Arch A or C only - No external API"]
+   Q4 -- Tier 4 --> T4["Arch A or C - NEVER transmit - Encrypt at rest"]
+   Q5 -- YES --> FREE["Unrestricted use"]
+   AB --> FC["&#10003; Fairness checklist"]
+   AC --> FC
+   AA --> FC
+   T3 --> FC
+   T4 --> FC
+
+   style START fill:#8C52FF,color:#fff,stroke:#8C52FF
+   style Q1 fill:#a370ff,stroke:#a370ff,color:#fff
+   style Q5 fill:#a370ff,stroke:#a370ff,color:#fff
+   style Q2 fill:#a370ff,stroke:#a370ff,color:#fff
+   style Q4 fill:#a370ff,stroke:#a370ff,color:#fff
+   style AB fill:#00BF63,stroke:#00BF63,color:#fff
+   style Q3 fill:#a370ff,stroke:#a370ff,color:#fff
+   style AC fill:#00BF63,stroke:#00BF63,color:#fff
+   style AA fill:#00BF63,stroke:#00BF63,color:#fff
+   style T01 fill:#00BF63,stroke:#00BF63,color:#fff
+   style T2 fill:#33cc7f,stroke:#33cc7f,color:#fff
+   style T3 fill:#ff9800,stroke:#ff9800,color:#fff
+   style T4 fill:#d32f2f,stroke:#d32f2f,color:#fff
+   style FREE fill:#00BF63,stroke:#00BF63,color:#fff
+   style FC fill:#fff,stroke:#8C52FF,color:#8C52FF
+      </pre>
+    </div>
+    <div class="diagram-note">Purple = decision points. Green = safe architectures. Orange = restricted. Red = prohibited external transmission. Every path involving patient data ends at the fairness checklist.</div>
+  </div>
+
+  <!-- PROJECT OVERVIEW -->
+  <div class="diagram-section">
+    <div class="diagram-label">Project structure</div>
+    <div class="diagram-title">PARSE Project Overview</div>
+    <div class="diagram-card">
+      <pre class="mermaid">
+flowchart LR
+   subgraph PROBLEM["PROBLEM"]
+       direction TB
+       P["93% use AI\n22% have at least some AI governance\n515K records exposed"]
+   end
+
+   subgraph DIAGNOSIS["DIAGNOSIS"]
+       direction TB
+       POL["Data Polarization\nToo little - Too much"]
+       BIAS["5 Conflict Biases\nSurvivorship - Topology\nNon-stationarity\nMNAR - Attribute paradox"]
+       CHAIN["6-Stage Bias Chain\nCollection - Digitization\n- Transmission - Analysis\n- Interpretation - Decision"]
+       POL --> BIAS --> CHAIN
+   end
+
+   subgraph FRAMEWORK["PARSE PROTOCOL"]
+       direction TB
+       TIERS["5 Sensitivity Tiers\nTier 0-1: public/operational\nTier 2: aggregate health\nTier 3: patient-level\nTier 4: protection-sensitive"]
+       ARCH["3 Architectures\nA: LLM builds tools\nB: de-identified data\nC: local model"]
+       CHECK["Fairness Checklist\nWho is missing?\nWhat changed?\nRe-identifiable?"]
+       TIERS --> ARCH --> CHECK
+   end
+
+   subgraph OUTPUT["DELIVERABLES"]
+       direction TB
+       D1["Protocol\ndocument"]
+       D2["De-ID\ntool"]
+       D3["NLP topic\nmodelling"]
+       D4["Website +\nnewsletter"]
+       D5["7 training\nvideos"]
+       D1 --- D2 --- D3 --- D4 --- D5
+   end
+
+   PROBLEM --> DIAGNOSIS --> FRAMEWORK --> OUTPUT
+
+   style PROBLEM fill:#8C52FF,stroke:#8C52FF,color:#fff
+   style P fill:#a370ff,stroke:#a370ff,color:#fff
+   style DIAGNOSIS fill:#7456d1,stroke:#7456d1,color:#fff
+   style POL fill:#8b6fdb,stroke:#8b6fdb,color:#fff
+   style BIAS fill:#8b6fdb,stroke:#8b6fdb,color:#fff
+   style CHAIN fill:#8b6fdb,stroke:#8b6fdb,color:#fff
+   style FRAMEWORK fill:#3a9b78,stroke:#3a9b78,color:#fff
+   style TIERS fill:#4daf8a,stroke:#4daf8a,color:#fff
+   style ARCH fill:#4daf8a,stroke:#4daf8a,color:#fff
+   style CHECK fill:#4daf8a,stroke:#4daf8a,color:#fff
+   style OUTPUT fill:#00BF63,stroke:#00BF63,color:#fff
+   style D1 fill:#33cc7f,stroke:#33cc7f,color:#fff
+   style D2 fill:#33cc7f,stroke:#33cc7f,color:#fff
+   style D3 fill:#33cc7f,stroke:#33cc7f,color:#fff
+   style D4 fill:#33cc7f,stroke:#33cc7f,color:#fff
+   style D5 fill:#33cc7f,stroke:#33cc7f,color:#fff
+      </pre>
+    </div>
+    <div class="diagram-note">Problem to deliverables: the PARSE project identifies the gap (93% use, 22% governance), diagnoses conflict-specific bias mechanisms, builds a protocol framework, and produces five concrete outputs.</div>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.1/dist/mermaid.min.js"></script>
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      fontFamily: 'Inter, system-ui, sans-serif',
+      fontSize: '13px'
+    },
+    flowchart: {
+      useMaxWidth: true,
+      htmlLabels: true,
+      curve: 'basis'
+    }
+  });
+</script>
+</body>
+</html>
