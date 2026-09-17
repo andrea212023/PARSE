@@ -26,12 +26,12 @@ PARSE is a protocol and training framework for medical professionals, coordinato
 | Folder | Contents |
 |--------|----------|
 | `protocol/` | Protocol document |
-| `tools/deid-checker/` | De-identification checker (HTML, works offline) |
-| `tools/nlp/` | Topic modelling notebook |
-| `website/` | Interactive protocol site |
+| `de-id-checker/` | De-identification checker (HTML, works offline) |
 | `newsletter/` | Newsletter template |
+| `lessons/` | Lessons template |
+| `nlp/` | Topic modelling notebook |
+| `website/` | Interactive protocol site |
 | `diagrams/` | Decision flowchart, project workflow |
-| `proposal/` | Project proposal document |
 
 ## Keywords
 
