@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARSE De-identification Checker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --purple: #8C52FF;
+    --purple-light: #a370ff;
+    --purple-soft: #f0e8ff;
+    --green: #00BF63;
+    --green-light: #33cc7f;
+    --green-soft: #e6f9ef;
+    --orange: #e67e00;
+    --orange-soft: #fff4e0;
+    --red: #d32f2f;
+    --red-soft: #fdeaea;
+    --red-deep: #b71c1c;
+    --bg: #f7f7fb;
+    --card: #ffffff;
+    --card2: #f0f0f6;
+    --text: #1a1a2e;
+    --muted: #6b6b85;
+    --border: #e2e2ee;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, var(--purple), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+  }
+  .logo-icon {
+    -webkit-text-fill-color: var(--purple);
+    font-size: 2rem;
+  }
+  .tagline {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-top: 8px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .input-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .input-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  textarea {
+    width: 100%;
+    min-height: 160px;
+    padding: 16px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 0.92rem;
+    background: var(--bg);
+    color: var(--text);
+    resize: vertical;
+    transition: border-color 0.3s;
+    line-height: 1.7;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--purple);
+    box-shadow: 0 0 0 3px rgba(140, 82, 255, 0.1);
+  }
+  textarea::placeholder { color: #aaa; }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  button {
+    padding: 11px 24px;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.2s;
+  }
+  button:hover { transform: translateY(-1px); opacity: 0.9; }
+  button:active { transform: translateY(0); }
+  .btn-check {
+    background: linear-gradient(135deg, var(--purple), var(--purple-light));
+    color: white;
+    flex: 1;
+  }
+  .btn-clear {
+    background: var(--card2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .btn-example {
+    background: transparent;
+    color: var(--purple);
+    border: 1px solid var(--purple);
+    font-size: 0.85rem;
+    padding: 10px 18px;
+  }
+
+  .results {
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .verdict-card {
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border: 1px solid;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .verdict-icon { font-size: 2rem; flex-shrink: 0; }
+  .verdict-text { font-weight: 700; font-size: 1.05rem; }
+  .verdict-sub { font-weight: 400; font-size: 0.85rem; opacity: 0.7; margin-top: 2px; }
+
+  .verdict-safe { background: var(--green-soft); border-color: rgba(0,191,99,0.3); color: #0a7a3e; }
+  .verdict-caution { background: var(--orange-soft); border-color: rgba(230,126,0,0.3); color: #b36200; }
+  .verdict-danger { background: var(--red-soft); border-color: rgba(211,47,47,0.3); color: var(--red); }
+  .verdict-critical { background: #fce4e4; border-color: rgba(183,28,28,0.3); color: var(--red-deep); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .stat-num {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .findings-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .findings-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .finding {
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    background: var(--bg);
+    border-left: 3px solid;
+    transition: background 0.2s;
+  }
+  .finding:hover { background: #eeeef6; }
+  .finding:last-child { margin-bottom: 0; }
+  .finding-t2 { border-color: var(--orange); }
+  .finding-t3 { border-color: var(--red); }
+  .finding-t4 { border-color: var(--red-deep); }
+  .finding-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .finding-type { font-weight: 600; font-size: 0.9rem; }
+  .finding-tier {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+  }
+  .tier-2 { background: var(--orange-soft); color: var(--orange); }
+  .tier-3 { background: var(--red-soft); color: var(--red); }
+  .tier-4 { background: #f8d0d0; color: var(--red-deep); }
+  .finding-match {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.82rem;
+    background: var(--purple-soft);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--purple);
+    margin-top: 6px;
+    display: inline-block;
+  }
+  .finding-advice {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .no-findings {
+    text-align: center;
+    padding: 24px;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .protocol-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 22px;
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+  .protocol-card strong { color: var(--purple); }
+
+  .footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: #aaa;
+    font-size: 0.78rem;
+  }
+
+  @media (max-width: 600px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .container { padding: 20px 14px; }
+    .logo { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo"><span class="logo-icon">◆</span> PARSE</div>
+    <p class="tagline">Check text for sensitivity risks before sending to an external LLM. Flags identifiers, small denominators, and conflict-sensitive information.</p>
+  </div>
+
+  <div class="input-card">
+    <div class="input-label">Paste text to check</div>
+    <textarea id="input" placeholder="Paste the text you plan to send to ChatGPT, Claude, or another LLM..."></textarea>
+    <div class="btn-row">
+      <button class="btn-check" onclick="analyze()">Check for risks</button>
+      <button class="btn-clear" onclick="clearAll()">Clear</button>
+      <button class="btn-example" onclick="loadExample()">Load example</button>
+    </div>
+  </div>
+
+  <div class="results" id="results">
+    <div id="verdict"></div>
+    <div class="stats" id="stats"></div>
+    <div class="findings-card">
+      <div class="findings-title">Findings</div>
+      <div id="findings"></div>
+    </div>
+    <div class="protocol-card" id="protocolRef"></div>
+  </div>
+
+  <div class="footer">PARSE Protocol v0.1 · Privacy · Algorithmic Fairness · Responsible AI · Structural Equity · Evidence-based</div>
+</div>
+
+<script>
+const RULES = [
+  { name: 'GPS coordinates', tier: 4, pattern: /(-?\d{1,3}\.\d{3,})[,\s]+(-?\d{1,3}\.\d{3,})/g, advice: 'GPS coordinates can reveal facility or patient locations. Remove entirely.' },
+  { name: 'Facility in conflict zone', tier: 4, pattern: /\b(hospital|clinic|health\s*cent[re]{2}|facility|camp)\s+(in|at|of|near)\s+[A-Z][a-zà-ÿ]+(\s+[A-Z][a-zà-ÿ]+)*/gi, advice: 'Named facility + location can be targeted. Generalize to region level.' },
+  { name: 'Ethnic or tribal reference', tier: 4, pattern: /\b(ethnic|tribe|tribal|clan|ethnicity|tutsi|hutu|dinka|nuer|arab\s+militia|zaghawa|fur\b|masalit|hausa|fulani)/gi, advice: 'Ethnic identifiers in conflict data can lead to targeting. Remove entirely.' },
+  { name: 'Sexual violence + identifiers', tier: 4, pattern: /\b(rape|sexual\s+violence|sexual\s+assault|gbv)\b.{0,80}\b(patient|woman|girl|victim|survivor|name|age\s*\d)/gi, advice: 'Sexual violence data with identifying detail is Tier 4. Never transmit.' },
+  { name: 'Combatant status indicators', tier: 4, pattern: /\b(combatant|fighter|soldier|militia|armed\s+group|gunshot|blast\s+injur|weapon|conflict.related\s+injur)/gi, advice: 'Injury type can reveal combatant status, endangering the patient.' },
+  { name: 'Patient name pattern', tier: 3, pattern: /\b(patient|pt|client|case)\s*[:#]?\s*[A-Z][a-zà-ÿ]+(\s+[A-Z][a-zà-ÿ]+)+/g, advice: 'Possible patient name. Replace with anonymized ID.' },
+  { name: 'Date of birth or specific age', tier: 3, pattern: /\b(born|dob|date\s+of\s+birth|age[d]?\s*:?\s*\d{1,2}\s*(year|month|week|day|ans|mois))/gi, advice: 'Specific age or DOB can be identifying in small populations. Use age ranges.' },
+  { name: 'Admission date', tier: 3, pattern: /\b(admitted|admission|visit|consultation|seen)\s+(on\s+)?\d{1,2}[\s\/\-](jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|\d{1,2})[\s\/\-]\d{2,4}/gi, advice: 'Specific dates re-identify patients in small facilities. Use week numbers.' },
+  { name: 'Phone number', tier: 3, pattern: /(\+?\d{1,3}[\s\-]?)?\(?\d{2,4}\)?[\s\-]?\d{3,4}[\s\-]?\d{3,4}/g, advice: 'Phone numbers are direct identifiers. Remove entirely.' },
+  { name: 'Clinical narrative + demographics', tier: 3, pattern: /\b(patient|woman|man|child|boy|girl)\s*,?\s*(aged?\s*\d+|from\s+[A-Z]|\d+\s*y(ear)?s?\s*old)/gi, advice: 'Clinical narrative with age + demographics can be identifying.' },
+  { name: 'Small numbers (n < 15)', tier: 2, pattern: /\b([1-9]|1[0-4])\s+(cases?|patients?|deaths?|admissions?|births?|women|children|people|persons)\b/gi, advice: 'Counts under 15 can re-identify individuals. Suppress or report as range.' },
+  { name: 'Village-level location', tier: 2, pattern: /\b(village|neighborhood|quartier|commune|locality|settlement)\s+(of\s+|de\s+)?[A-Z][a-zà-ÿ]+/gi, advice: 'Sub-district names may be too precise. Generalize to district level.' },
+  { name: 'Named health facility', tier: 2, pattern: /\b[A-Z][a-zà-ÿ]+(\s+[A-Z][a-zà-ÿ]+)*\s+(Hospital|Clinic|Health\s*Cent[re]{2}|PHC|OPD|IPD)\b/g, advice: 'Named facilities can be identifying in sparse areas.' }
+];
+
+const EXAMPLE = `On March 14, Dr. Ahmed saw patient Fatima Al-Hassan, a 23-year-old woman from the village of Kutum who presented with injuries consistent with sexual assault. She was admitted to the MSF clinic in El Fasher at coordinates 13.6293, 25.3493.\n\nThis week our facility treated 4 patients with gunshot wounds and 3 children with severe acute malnutrition. The Zaghawa community in the area has been particularly affected.\n\nTotal cholera cases this month: 847. Attack rate in Kutum locality: 12.3/1000. We need to send this summary to HQ for the weekly report.`;
+
+function analyze() {
+  const text = document.getElementById('input').value.trim();
+  if (!text) return;
+  const findings = [];
+  let maxTier = 0;
+  for (const rule of RULES) {
+    const regex = new RegExp(rule.pattern.source, rule.pattern.flags);
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      findings.push({ type: rule.name, tier: rule.tier, match: match[0].substring(0, 60), advice: rule.advice });
+      if (rule.tier > maxTier) maxTier = rule.tier;
+    }
+  }
+  const seen = new Set();
+  const unique = findings.filter(f => { const k = f.type+':'+f.match; if (seen.has(k)) return false; seen.add(k); return true; });
+  unique.sort((a, b) => b.tier - a.tier);
+  render(unique, maxTier, text);
+}
+
+function render(findings, maxTier, text) {
+  document.getElementById('results').style.display = 'block';
+  const v = document.getElementById('verdict');
+  let vc, icon, txt, sub, proto;
+  if (maxTier >= 4) {
+    vc='verdict-critical'; icon='⛔'; txt='NEVER SEND EXTERNALLY'; sub='Tier 4 protection-sensitive data detected';
+    proto='<strong>PARSE §2.1 — Tier 4:</strong> Use Architecture A (LLM generates tools, never sees data) or Architecture C (local model). No external transmission under any circumstances.';
+  } else if (maxTier >= 3) {
+    vc='verdict-danger'; icon='🔴'; txt='DO NOT SEND'; sub='Patient-identifiable information detected';
+    proto='<strong>PARSE §2.2 — Tier 3:</strong> Apply full de-identification standard before external transmission. Consider Architecture A or C.';
+  } else if (maxTier >= 2) {
+    vc='verdict-caution'; icon='🟡'; txt='REVIEW BEFORE SENDING'; sub='Potential re-identification risks flagged';
+    proto='<strong>PARSE §2.2 — Tier 2:</strong> Apply small-denominator test. Use zero-data-retention API only. Run the motivated-intruder test.';
+  } else {
+    vc='verdict-safe'; icon='✅'; txt='LIKELY SAFE'; sub='No sensitivity risks detected';
+    proto='<strong>PARSE §1.1 — Tier 0–1:</strong> Standard documentation requirements apply. Commercial APIs permitted.';
+  }
+  v.className = 'verdict-card ' + vc;
+  v.innerHTML = `<div class="verdict-icon">${icon}</div><div><div class="verdict-text">${txt}</div><div class="verdict-sub">${sub}</div></div>`;
+
+  const t4=findings.filter(f=>f.tier===4).length, t3=findings.filter(f=>f.tier===3).length, t2=findings.filter(f=>f.tier===2).length;
+  document.getElementById('stats').innerHTML = `
+    <div class="stat"><div class="stat-num" style="color:var(--red-deep)">${t4}</div><div class="stat-label">Tier 4 Critical</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--red)">${t3}</div><div class="stat-label">Tier 3 Patient</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--orange)">${t2}</div><div class="stat-label">Tier 2 Caution</div></div>
+    <div class="stat"><div class="stat-num" style="color:var(--purple)">${text.split(/\s+/).length}</div><div class="stat-label">Words scanned</div></div>`;
+
+  const fl = document.getElementById('findings');
+  if (!findings.length) {
+    fl.innerHTML = '<div class="no-findings">✓ No risks detected in this text</div>';
+  } else {
+    fl.innerHTML = findings.map(f => `
+      <div class="finding finding-t${f.tier}">
+        <div class="finding-row">
+          <span class="finding-type">${f.type}</span>
+          <span class="finding-tier tier-${f.tier}">TIER ${f.tier}</span>
+        </div>
+        <div class="finding-match">${esc(f.match)}</div>
+        <div class="finding-advice">${f.advice}</div>
+      </div>`).join('');
+  }
+  document.getElementById('protocolRef').innerHTML = proto;
+}
+
+function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+function clearAll() { document.getElementById('input').value=''; document.getElementById('results').style.display='none'; }
+function loadExample() { document.getElementById('input').value=EXAMPLE; }
+</script>
+</body>
+</html>
