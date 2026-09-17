@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARSE - Training Modules</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #8C52FF; --purple-light: #a370ff; --purple-soft: #f0e8ff;
+    --green: #00BF63; --green-light: #33cc7f; --green-soft: #e6f9ef;
+    --orange: #e67e00; --red: #d32f2f;
+    --text: #1a1a2e; --muted: #6b6b85; --bg: #fafafe; --card: #ffffff; --border: #e8e6f0;
+    --sidebar-w: 260px;
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+
+  .sidebar { position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh; background: white; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 0; z-index: 100; }
+  .sidebar-logo { padding: 0 20px 20px; margin-bottom: 8px; }
+  .sidebar-logo-text { font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, var(--purple), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sidebar-logo-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; }
+  .toc-section { padding: 0 12px; margin-bottom: 2px; }
+  .toc-heading { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--purple); padding: 10px 12px 4px; }
+  .toc-link { display: block; padding: 5px 12px; font-size: 0.78rem; color: var(--muted); text-decoration: none; border-radius: 6px; font-weight: 500; transition: all 0.15s; }
+  .toc-link:hover { color: var(--purple); }
+  .toc-link.active { color: var(--purple); font-weight: 700; border-left: 2px solid var(--purple); border-radius: 0; padding-left: 10px; }
+  .toc-num { display: inline-block; width: 20px; font-weight: 700; color: var(--purple-light); }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); margin-top: 12px; }
+  .sidebar-footer a { display: block; font-size: 0.78rem; color: var(--purple); text-decoration: none; padding: 4px 0; font-weight: 600; }
+
+  .main { margin-left: var(--sidebar-w); max-width: 740px; padding: 40px 48px 80px; }
+  .lesson { padding-top: 32px; margin-bottom: 56px; border-bottom: 1px solid var(--border); padding-bottom: 40px; }
+  .lesson:last-child { border-bottom: none; }
+  .lesson-num { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple); margin-bottom: 4px; }
+  h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 6px; line-height: 1.25; }
+  .lesson-sub { font-size: 0.85rem; color: var(--muted); margin-bottom: 18px; font-style: italic; }
+  h2 { font-size: 1.15rem; font-weight: 700; margin-top: 28px; margin-bottom: 10px; }
+  h3 { font-size: 0.95rem; font-weight: 700; margin-top: 20px; margin-bottom: 8px; color: var(--purple); }
+  p { margin-bottom: 12px; font-size: 0.9rem; color: #444; }
+  strong { color: var(--text); }
+
+  .callout { border-radius: 8px; padding: 14px 18px; margin: 16px 0; font-size: 0.86rem; line-height: 1.6; }
+  .callout-purple { background: var(--purple-soft); border-left: 3px solid var(--purple); }
+  .callout-green { background: var(--green-soft); border-left: 3px solid var(--green); }
+  .callout-orange { background: #fff4e0; border-left: 3px solid var(--orange); }
+  .callout-red { background: #fdeaea; border-left: 3px solid var(--red); }
+  .callout-title { font-weight: 700; font-size: 0.78rem; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .example-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px 18px; margin: 16px 0; }
+  .example-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .example-label.safe { color: var(--green); }
+  .example-label.risky { color: var(--orange); }
+  .example-label.danger { color: var(--red); }
+  .example-text { font-size: 0.85rem; color: #555; font-style: italic; line-height: 1.6; margin-bottom: 8px; }
+  .example-why { font-size: 0.82rem; color: #444; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 0.84rem; }
+  th { background: white; color: var(--purple); text-align: left; padding: 7px 12px; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--purple); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: #555; }
+
+  .concept-check { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 8px; padding: 16px 18px; margin: 20px 0; }
+  .concept-check-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--green); margin-bottom: 6px; }
+  .concept-check p { font-size: 0.86rem; }
+  .reveal-btn { margin-top: 10px; padding: 5px 14px; border: 1px solid var(--green); border-radius: 6px; background: white; color: var(--green); font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+  .reveal-btn:hover { background: var(--green-soft); }
+  .reveal-answer { display: none; margin-top: 10px; padding: 12px; background: white; border-radius: 6px; font-size: 0.84rem; color: #444; border: 1px solid var(--border); }
+
+  .bias-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; margin-bottom: 10px; border-left: 3px solid var(--purple); }
+  .bias-item h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
+  .bias-item p { font-size: 0.82rem; color: var(--muted); margin-bottom: 0; }
+
+  .tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 14px 0; }
+  .tier-card { border-radius: 8px; padding: 12px 14px; border: 1px solid var(--border); background: var(--card); }
+  .tier-card h4 { font-size: 0.8rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .tier-card p { font-size: 0.78rem; margin-bottom: 0; color: var(--muted); }
+  .tier-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+  .chain-step { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .chain-step:last-child { border-bottom: none; }
+  .chain-num { width: 28px; height: 28px; min-width: 28px; border-radius: 50%; background: var(--purple); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; }
+  .chain-content { flex: 1; }
+  .chain-content strong { font-size: 0.85rem; }
+  .chain-content span { font-size: 0.78rem; color: var(--muted); }
+
+  .menu-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 200; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 1.2rem; cursor: pointer; align-items: center; justify-content: center; }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
+    .main { margin-left: 0; padding: 48px 20px 60px; }
+    .menu-toggle { display: flex; }
+    .tier-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-text">&#9670; PARSE</div>
+    <div class="sidebar-logo-sub">Training modules</div>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Lessons</div>
+    <a class="toc-link" href="#L0" onclick="closeMobile()"><span class="toc-num">0</span> What is PARSE</a>
+    <a class="toc-link" href="#L1" onclick="closeMobile()"><span class="toc-num">1</span> The data polarization</a>
+    <a class="toc-link" href="#L2" onclick="closeMobile()"><span class="toc-num">2</span> Missingness</a>
+    <a class="toc-link" href="#L3" onclick="closeMobile()"><span class="toc-num">3</span> Five conflict biases</a>
+    <a class="toc-link" href="#L4" onclick="closeMobile()"><span class="toc-num">4</span> The bias chain</a>
+    <a class="toc-link" href="#L5" onclick="closeMobile()"><span class="toc-num">5</span> Using LLMs safely</a>
+    <a class="toc-link" href="#L6" onclick="closeMobile()"><span class="toc-num">6</span> NLP &amp; topic modelling</a>
+  </div>
+  <div class="sidebar-footer">
+    <a href="index.html">&#8592; Back to main site</a>
+    <a href="protocol.html">Full protocol</a>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ===== LESSON 0 ===== -->
+<div class="lesson" id="L0">
+  <div class="lesson-num">Module 0</div>
+  <h1>What is PARSE and why do you need it</h1>
+  <div class="lesson-sub">The 93% vs 22% gap. The ICRC hack. What the protocol covers.</div>
+
+  <p><strong>93% of humanitarian professionals already use AI tools like ChatGPT and Claude for work.</strong> But only 22% of organizations have any AI governance policy (HLA &amp; DFS, 2025). This means sensitive patient data from conflict zones is being processed through commercial LLM APIs with no safeguards.</p>
+
+  <div class="callout callout-red">
+    <div class="callout-title" style="color:var(--red)">The ICRC hack</div>
+    <p style="margin:0">In January 2022, a cyberattack on the ICRC exposed personal data of over 515,000 vulnerable people, many searching for missing family members. If it can happen to the most security-conscious humanitarian organization, it can happen to anyone.</p>
+  </div>
+
+  <p>PARSE addresses three interdependent problems: <strong>confidentiality</strong> (patient data carries extreme risk if exposed), <strong>coordination</strong> (data flows through multiple actors and jurisdictions), and <strong>fairness</strong> (conflict-zone data is subject to bias mechanisms absent from standard literature).</p>
+
+  <div class="example-box">
+    <div class="example-label danger">What can go wrong</div>
+    <div class="example-text">"I have a 34-year-old pregnant woman from northern Rakhine, Rohingya, with P. falciparum malaria and sickle-cell trait..."</div>
+    <div class="example-why">A field nurse types this into ChatGPT to get treatment advice. Every word is now stored on a server she does not control. If it leaks, the patient's ethnicity, location, and medical condition are exposed. In a genocide context, this is a threat to life.</div>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>A nurse uses ChatGPT to translate a patient's symptoms from Arabic to English. She types the patient's name, age, village, and symptoms. What is the minimum risk level?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer"><strong>Tier 3 at minimum</strong> (individual patient data with direct identifiers). If the village is in an active conflict zone or the symptoms suggest conflict-related injury, it escalates to <strong>Tier 4</strong>. The name alone makes it Tier 3 regardless of context.</div>
+  </div>
+</div>
+
+<!-- ===== LESSON 1 ===== -->
+<div class="lesson" id="L1">
+  <div class="lesson-num">Module 1</div>
+  <h1>The data polarization</h1>
+  <div class="lesson-sub">Too little vs too much. When both extremes lead to the same failure.</div>
+
+  <p>Humanitarian health data exists at two extremes. Understanding which one you're in determines everything else.</p>
+
+  <div class="tier-grid">
+    <div class="tier-card">
+      <h4><span class="tier-dot" style="background:var(--orange)"></span> Too little data</h4>
+      <p>Acute emergencies, paper tally sheets, unknown denominators. The risk: <strong>invisibility</strong>. What you don't count doesn't get resourced.</p>
+    </div>
+    <div class="tier-card">
+      <h4><span class="tier-dot" style="background:var(--purple)"></span> Too much data</h4>
+      <p>47 dashboard indicators, weekly reports nobody reads. The risk: <strong>false confidence</strong>. Acting on numbers that look precise but carry hidden distortions.</p>
+    </div>
+  </div>
+
+  <p><strong>Both extremes share the same failure:</strong> the gap between having information and knowing what to do with it.</p>
+
+  <div class="example-box">
+    <div class="example-label risky">Too little</div>
+    <div class="example-text">A mobile clinic near a frontline sees 12 patients per day. No lab, no X-ray, paper records. The nurse knows malaria is rising but has no denominator. She can't tell coordination how bad it is because she has no population estimate.</div>
+  </div>
+  <div class="example-box">
+    <div class="example-label risky">Too much</div>
+    <div class="example-text">A data scientist at a coordination center manages data from 15 villages and 2 cities. 15 years of data, 200 variables, 47 spreadsheets. Everyone keeps sending more. She still doesn't know what to do with it.</div>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>Your DHIS2 dashboard shows 312 cholera cases across 8 facilities. Three facilities are in areas accessible only during ceasefires (~10 days/month). Is the total likely an overestimate or underestimate?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer"><strong>Underestimate.</strong> The inaccessible-during-fighting days are when populations are most exposed and least able to seek care. The cases you don't see are probably more, not fewer. This is a "too little data" problem hidden inside a dashboard that looks complete.</div>
+  </div>
+</div>
+
+<!-- ===== LESSON 2 ===== -->
+<div class="lesson" id="L2">
+  <div class="lesson-num">Module 2</div>
+  <h1>Missingness: MCAR, MAR, MNAR</h1>
+  <div class="lesson-sub">Why conflict data is almost always Missing Not At Random.</div>
+
+  <table>
+    <tr><th>Type</th><th>Meaning</th><th>In conflict data</th></tr>
+    <tr><td><strong>MCAR</strong></td><td>Missing completely at random. A nurse skips a field by accident.</td><td>Rare</td></tr>
+    <tr><td><strong>MAR</strong></td><td>Missing at random, predictable from other variables. Men report weight less.</td><td>Sometimes</td></tr>
+    <tr><td><strong>MNAR</strong></td><td>Missing because of the value itself. Sickest patients die before arrival.</td><td><strong>The default</strong></td></tr>
+  </table>
+
+  <div class="callout callout-red">
+    <div class="callout-title" style="color:var(--red)">Why this matters</div>
+    <p style="margin:0">Standard imputation methods (mean imputation, MICE) assume MAR. Applied to MNAR data, they produce <strong>confident but wrong estimates</strong>: narrow confidence intervals around biased point estimates. You become certain of the wrong answer.</p>
+  </div>
+
+  <div class="example-box">
+    <div class="example-label danger">MNAR in practice</div>
+    <div class="example-text">A hospital in eastern DRC reports 0 cases of sexual violence for three consecutive weeks. The hospital was operational. Staff were present.</div>
+    <div class="example-why"><strong>The zero is informative.</strong> Survivors may not be reaching the facility, may not feel safe disclosing, or the security situation may prevent travel. Zero reported cases ≠ zero cases. This is classic MNAR: the value is missing because of what the value would have been.</div>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>You're building a malnutrition model from facility data. 30% of records are missing the MUAC (mid-upper arm circumference) measurement. You use mean imputation to fill them. What's the problem?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer"><strong>Mean imputation assumes MAR.</strong> But MUAC is most likely missing for the sickest children - the ones who died before measurement, were too weak to extend their arm, or arrived at night when the trained measurer wasn't present. Replacing their values with the mean makes severe malnutrition <em>disappear from the data</em>. Use sensitivity analyses instead.</div>
+  </div>
+</div>
+
+<!-- ===== LESSON 3 ===== -->
+<div class="lesson" id="L3">
+  <div class="lesson-num">Module 3</div>
+  <h1>Five biases you won't find in any textbook</h1>
+  <div class="lesson-sub">Survivorship, topology, non-stationarity, MNAR, the protected-attribute paradox.</div>
+
+  <p>Standard algorithmic fairness assumes data exists, protected attributes are known, the process is stationary, and missingness is MAR. <strong>In conflict, none of this holds.</strong></p>
+
+  <div class="bias-item">
+    <h4>1. Survivorship / Access bias</h4>
+    <p>Only people who reached your facility are in the data. The sickest, most remote, most besieged are systematically absent.</p>
+  </div>
+  <div class="bias-item" style="border-left-color:var(--orange)">
+    <h4>2. Conflict-topology bias</h4>
+    <p>Front lines, checkpoints, and siege create non-random partitions. The partition correlates with conflict exposure. You see one side, not the other.</p>
+  </div>
+  <div class="bias-item" style="border-left-color:var(--red)">
+    <h4>3. Temporal non-stationarity</h4>
+    <p>A hospital is bombed. A population is displaced overnight. Models trained on pre-event data are invalid. The model won't tell you it's wrong.</p>
+  </div>
+  <div class="bias-item" style="border-left-color:var(--green)">
+    <h4>4. MNAR as the default</h4>
+    <p>Every category of missing data is missing for reasons correlated with the values that would have been observed.</p>
+  </div>
+  <div class="bias-item" style="border-left-color:#e67e00">
+    <h4>5. The protected-attribute paradox</h4>
+    <p>The most fairness-relevant attributes (ethnicity, tribal affiliation) are too dangerous to collect. You cannot audit for fairness across a variable you cannot measure.</p>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>You are auditing an AI triage tool across three facilities in an ethnic conflict. You want to check if the tool performs equally for all ethnic groups. What is the fundamental problem?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer"><strong>Protected-attribute paradox.</strong> Recording ethnicity could endanger patients. You can't audit fairness across a variable you can't safely collect. The protocol suggests auditing at <em>facility level</em> as a proxy, since different facilities likely serve different populations due to conflict-topology bias.</div>
+  </div>
+</div>
+
+<!-- ===== LESSON 4 ===== -->
+<div class="lesson" id="L4">
+  <div class="lesson-num">Module 4</div>
+  <h1>The six-stage bias chain</h1>
+  <div class="lesson-sub">From collection to decision: how biases compound at each stage.</div>
+
+  <p>Bias is not one problem. It is a chain. Each stage inherits and amplifies the distortions from the one before.</p>
+
+  <div style="margin:20px 0">
+    <div class="chain-step"><div class="chain-num">0</div><div class="chain-content"><strong>Pre-existing</strong><br><span>Healthcare already unequal before conflict. Structural exclusion.</span></div></div>
+    <div class="chain-step"><div class="chain-num">1</div><div class="chain-content"><strong>Collection</strong><br><span>Only survivors who reach facility are counted. Survivorship, self-selection, gender bias.</span></div></div>
+    <div class="chain-step"><div class="chain-num">2</div><div class="chain-content"><strong>Digitization</strong><br><span>Paper to digital transfer, forced categories. Transcription and structured-field bias.</span></div></div>
+    <div class="chain-step"><div class="chain-num">3</div><div class="chain-content"><strong>Transmission</strong><br><span>Only connected facilities report regularly. Connectivity-driven selection.</span></div></div>
+    <div class="chain-step"><div class="chain-num">4</div><div class="chain-content"><strong>Analysis</strong><br><span>Models assume stability that doesn't exist. Stationarity, MNAR, denominator bias.</span></div></div>
+    <div class="chain-step"><div class="chain-num">5</div><div class="chain-content"><strong>Decision</strong><br><span>Dashboard numbers treated as truth. Anchoring, automation bias, invisibility bias.</span></div></div>
+  </div>
+
+  <div class="callout callout-red">
+    <div class="callout-title" style="color:var(--red)">The terminal bias</div>
+    <p style="margin:0">Resources flow toward documented need, which follows data quality, which follows infrastructure access, which follows safety. <strong>End result: the safest populations get the most resources. The most endangered get the least.</strong></p>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>A coordination team allocates emergency nutrition supplies based on DHIS2 malnutrition admissions. Three well-connected urban facilities report 400 cases. Five rural clinics with intermittent connectivity report 60 cases total. Where does most of the supply go?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer"><strong>Urban facilities get more.</strong> But the rural clinics likely serve a larger, more vulnerable population with worse malnutrition. Their low numbers reflect <em>transmission bias</em> (Stage 3) and <em>survivorship bias</em> (Stage 1), not lower need. The bias chain turns data quality into a resource allocation mechanism that punishes the most affected.</div>
+  </div>
+</div>
+
+<!-- ===== LESSON 5 ===== -->
+<div class="lesson" id="L5">
+  <div class="lesson-num">Module 5</div>
+  <h1>Using LLMs safely: three architectures</h1>
+  <div class="lesson-sub">Sensitivity tiers, de-identification standard, the decision flowchart.</div>
+
+  <p>The first question is never <em>which model</em>. It is <strong>what the model is allowed to see</strong>.</p>
+
+  <h3>Sensitivity tiers</h3>
+  <div class="tier-grid">
+    <div class="tier-card"><h4><span class="tier-dot" style="background:var(--green)"></span> Tier 0-1</h4><p>Public/operational data. Commercial APIs OK.</p></div>
+    <div class="tier-card"><h4><span class="tier-dot" style="background:var(--orange)"></span> Tier 2</h4><p>Aggregate health data. Zero-retention API only. Small denominator test.</p></div>
+    <div class="tier-card"><h4><span class="tier-dot" style="background:var(--red)"></span> Tier 3</h4><p>Patient data. NEVER external. Local models only.</p></div>
+    <div class="tier-card"><h4><span class="tier-dot" style="background:#880000"></span> Tier 4</h4><p>Protection-sensitive. NEVER transmit. Encrypt at rest.</p></div>
+  </div>
+
+  <h3>Three architectures</h3>
+  <div class="callout callout-green"><div class="callout-title" style="color:var(--green)">Architecture A (preferred)</div><p style="margin:0">LLM builds tools, templates, code. You run them locally. <strong>AI never sees real data.</strong> Works for all tiers.</p></div>
+  <div class="callout callout-purple"><div class="callout-title" style="color:var(--purple)">Architecture B</div><p style="margin:0">LLM sees de-identified/aggregated data. Zero-retention API. Tiers 0-2 only. Requires de-identification standard.</p></div>
+  <div class="callout callout-orange"><div class="callout-title" style="color:var(--orange)">Architecture C</div><p style="margin:0">Local open-weights model. Data never leaves your network. All tiers, but needs hardware and validation.</p></div>
+
+  <div class="example-box">
+    <div class="example-label safe">Architecture A in action</div>
+    <div class="example-text">"Write me an R script that takes a CSV with columns 'age_group', 'sex', 'diagnosis', 'outcome' and produces a cohort analysis of TB treatment outcomes."</div>
+    <div class="example-why">The LLM sees variable names and logic. Field staff run the script on real DHIS2 data locally. The model never touches a patient record.</div>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>You want to use an LLM to summarize clinical notes from 50 patients to prepare a medical handover report. You have no local model. What architecture should you use?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer"><strong>Architecture A.</strong> Clinical notes are Tier 3 (individual patient data). You cannot send them to an external API (rules out B). You have no local model (rules out C). So you use Architecture A: ask the LLM to generate a <em>template</em> for the handover report, then fill it in manually with the patient data. The LLM helps with structure, not content.</div>
+  </div>
+</div>
+
+<!-- ===== LESSON 6 ===== -->
+<div class="lesson" id="L6">
+  <div class="lesson-num">Module 6</div>
+  <h1>NLP and topic modelling for humanitarian orgs</h1>
+  <div class="lesson-sub">What machines can read that you don't have time to. Reporting bias detection.</div>
+
+  <p>Topic modelling takes a collection of documents and automatically discovers groups of words that appear together. Applied to MSF's published reports from conflict zones, it reveals <strong>reporting bias</strong>: which medical themes dominate communications and which are systematically absent.</p>
+
+  <div class="callout callout-green">
+    <div class="callout-title" style="color:var(--green)">This is Architecture A in practice</div>
+    <p style="margin:0">The pipeline processes only public text (published reports, situation updates). No patient data is involved. The LLM never sees anything above Tier 0.</p>
+  </div>
+
+  <h3>What reporting bias looks like</h3>
+  <p>In an analysis of 500+ MSF reports across 12 conflict zones:</p>
+  <table>
+    <tr><th>Theme</th><th>% of reports</th><th>Status</th></tr>
+    <tr><td>Trauma/Surgery</td><td>54%</td><td style="color:var(--green)">Well-reported</td></tr>
+    <tr><td>Infectious disease</td><td>52%</td><td style="color:var(--green)">Well-reported</td></tr>
+    <tr><td>Mental health</td><td>37%</td><td style="color:var(--orange)">Moderate</td></tr>
+    <tr><td>Chronic disease</td><td>14%</td><td style="color:var(--red)">Under-reported</td></tr>
+    <tr><td>Disability</td><td>9%</td><td style="color:var(--red)">Under-reported</td></tr>
+  </table>
+
+  <p><strong>Under-reported themes receive less donor attention, less funding, and less programmatic investment.</strong> The silence in organizational communications becomes a gap in care.</p>
+
+  <div class="example-box">
+    <div class="example-label risky">The silence is the signal</div>
+    <div class="example-text">NLP cannot tell you what is happening on the ground. But it can tell you what your organization is saying - and what it is not saying.</div>
+  </div>
+
+  <div class="concept-check">
+    <div class="concept-check-label">Check your knowledge</div>
+    <p>Your topic model shows that "mental health" appears in 37% of reports overall, but only 13% of reports from Ukraine and 19% from Myanmar. What might explain this?</p>
+    <button class="reveal-btn" onclick="this.nextElementSibling.style.display='block'">Reveal answer</button>
+    <div class="reveal-answer">Several possibilities, and <strong>you cannot distinguish between them from the text alone</strong>: (1) mental health services may genuinely be less available in those contexts, (2) reporting culture may prioritize trauma/surgery over mental health, (3) stigma may suppress disclosure, (4) report authors may assume mental health is implied and not mention it explicitly. The topic model flags the pattern; a field epidemiologist interprets it.</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function closeMobile() { document.querySelector('.sidebar').classList.remove('open'); }
+const links = document.querySelectorAll('.toc-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector('.toc-link[href="#' + id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -75% 0px' });
+document.querySelectorAll('.lesson').forEach(s => observer.observe(s));
+</script>
+</body>
+</html>
