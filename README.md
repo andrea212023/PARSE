@@ -9,7 +9,7 @@ PARSE is a protocol and training framework for medical professionals, coordinato
 
 ## The problem
 
-93% of humanitarian professionals use AI tools for work. 9% of organizations have governance for it. In 2022, the ICRC was hacked and 515,000 vulnerable people's data was exposed. No existing framework addresses LLM governance, conflict-specific data bias, and structural equity together.
+93% of humanitarian professionals use AI tools for work. Only 22% of organizations have at least some governance in place for it. In 2022, the ICRC was hacked and 515,000 vulnerable people's data was exposed. No existing framework addresses LLM governance, conflict-specific data bias, and structural equity together.
 
 ## What PARSE includes
 
