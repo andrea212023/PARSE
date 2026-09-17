@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PARSE - Full Protocol Document</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #8C52FF; --purple-light: #a370ff; --purple-soft: #f0e8ff; --purple-dim: #ede5ff;
+    --green: #00BF63; --green-light: #33cc7f; --green-soft: #e6f9ef;
+    --orange: #e67e00; --red: #d32f2f;
+    --text: #1a1a2e; --muted: #6b6b85; --bg: #fafafe; --card: #ffffff; --border: #e8e6f0;
+    --sidebar-w: 280px;
+  }
+  body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.75; }
+
+  .sidebar {
+    position: fixed; top: 0; left: 0; width: var(--sidebar-w); height: 100vh;
+    background: white; border-right: 1px solid var(--border); overflow-y: auto; padding: 24px 0; z-index: 100;
+  }
+  .sidebar-logo { padding: 0 20px 20px; margin-bottom: 12px; }
+  .sidebar-logo-text { font-size: 1.4rem; font-weight: 800; background: linear-gradient(135deg, var(--purple), var(--green)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .sidebar-logo-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; line-height: 1.4; }
+  .toc-section { padding: 0 12px; margin-bottom: 4px; }
+  .toc-heading { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: var(--purple); padding: 12px 12px 4px; }
+  .toc-link { display: block; padding: 5px 12px; font-size: 0.82rem; color: var(--muted); text-decoration: none; border-radius: 6px; transition: all 0.15s; font-weight: 500; }
+  .toc-link:hover { color: var(--purple); }
+  .toc-link.sub { padding-left: 24px; font-size: 0.78rem; }
+  .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border); margin-top: 16px; }
+  .sidebar-footer a { display: block; font-size: 0.78rem; color: var(--purple); text-decoration: none; padding: 4px 0; font-weight: 600; }
+
+  .main { margin-left: var(--sidebar-w); max-width: 740px; padding: 48px 48px 80px; }
+  .chapter { padding-top: 32px; margin-bottom: 52px; }
+  .chapter-num { font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--purple); margin-bottom: 4px; }
+  h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.3px; margin-bottom: 16px; line-height: 1.25; }
+  h2 { font-size: 1.3rem; font-weight: 700; margin-top: 40px; margin-bottom: 12px; padding-top: 24px; letter-spacing: -0.2px; }
+  h3 { font-size: 1rem; font-weight: 700; margin-top: 24px; margin-bottom: 8px; color: var(--purple); }
+  p { margin-bottom: 14px; font-size: 0.92rem; color: #444; }
+  strong { color: var(--text); }
+
+  .callout { border-radius: 8px; padding: 16px 20px; margin: 20px 0; font-size: 0.88rem; line-height: 1.6; }
+  .callout-purple { background: var(--purple-soft); border-left: 3px solid var(--purple); }
+  .callout-green { background: var(--green-soft); border-left: 3px solid var(--green); }
+  .callout-orange { background: #fff4e0; border-left: 3px solid var(--orange); }
+  .callout-red { background: #fdeaea; border-left: 3px solid var(--red); }
+  .callout-title { font-weight: 700; font-size: 0.82rem; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .tier-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .tier-card { border-radius: 8px; padding: 14px 16px; border: 1px solid var(--border); background: var(--card); }
+  .tier-card h4 { font-size: 0.82rem; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .tier-card p { font-size: 0.8rem; margin-bottom: 4px; color: var(--muted); }
+  .tier-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+
+  .bias-list { margin: 20px 0; }
+  .bias-item { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 18px 20px; margin-bottom: 12px; border-left: 3px solid var(--purple); }
+  .bias-item h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; }
+  .bias-item p { font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+  .bias-item .mitigation { font-size: 0.82rem; color: #444; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); }
+  .bias-item .mitigation strong { color: var(--green); }
+  .bias-item ul { font-size: 0.82rem; color: #555; margin: 6px 0 0 18px; }
+  .bias-item ul li { margin-bottom: 4px; }
+
+  .arch-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 20px 0; }
+  .arch-card { border-radius: 8px; padding: 16px; text-align: center; border: 1px solid var(--border); background: var(--card); }
+  .arch-card h4 { font-size: 0.92rem; font-weight: 800; margin-bottom: 6px; }
+  .arch-card p { font-size: 0.8rem; color: var(--muted); margin-bottom: 0; }
+  .arch-a h4 { color: var(--green); }
+  .arch-b h4 { color: var(--purple); }
+  .arch-c h4 { color: var(--orange); }
+
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.85rem; }
+  th { background: white; color: var(--purple); text-align: left; padding: 8px 14px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid var(--purple); }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); color: #555; }
+
+  .decision-tree { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 20px 0; font-size: 0.85rem; font-family: 'Inter', monospace; line-height: 1.8; color: #444; white-space: pre-wrap; }
+  .decision-tree strong { color: var(--purple); }
+
+  .checklist { margin: 20px 0; }
+  .checklist-item { display: flex; gap: 10px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; background: var(--card); font-size: 0.85rem; color: #444; align-items: flex-start; }
+  .checklist-box { width: 18px; height: 18px; min-width: 18px; border: 2px solid var(--purple); border-radius: 4px; margin-top: 2px; }
+
+  .ref-list { margin: 16px 0; }
+  .ref-item { font-size: 0.82rem; color: #555; margin-bottom: 10px; line-height: 1.5; padding-left: 20px; text-indent: -20px; }
+
+  .quick-ref { background: var(--purple-soft); border-radius: 10px; padding: 20px 24px; margin: 20px 0; }
+  .quick-ref h4 { color: var(--purple); font-size: 0.85rem; font-weight: 700; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .quick-ref ul { font-size: 0.85rem; color: #444; margin: 0 0 12px 18px; }
+  .quick-ref ul li { margin-bottom: 4px; }
+
+  .menu-toggle { display: none; position: fixed; top: 12px; left: 12px; z-index: 200; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--border); background: white; font-size: 1.2rem; cursor: pointer; align-items: center; justify-content: center; }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.1); }
+    .main { margin-left: 0; padding: 48px 20px 60px; }
+    .menu-toggle { display: flex; }
+    .tier-grid, .arch-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">&#9776;</button>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-text">&#9670; PARSE</div>
+    <div class="sidebar-logo-sub">Full Protocol Document<br>Version 0.1 - Working Draft</div>
+  </div>
+
+  <div class="toc-section">
+    <div class="toc-heading">Preamble</div>
+    <a class="toc-link" href="#why" onclick="closeMobile()">Why this protocol exists</a>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Part I: Data Classification</div>
+    <a class="toc-link" href="#tiers" onclick="closeMobile()">Sensitivity tiers</a>
+    <a class="toc-link sub" href="#context-sensitivity" onclick="closeMobile()">Context-dependent sensitivity</a>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Part II: LLM Use</div>
+    <a class="toc-link" href="#core-principle" onclick="closeMobile()">Core principle</a>
+    <a class="toc-link sub" href="#architectures" onclick="closeMobile()">Three architectures</a>
+    <a class="toc-link sub" href="#deid-standard" onclick="closeMobile()">De-identification standard</a>
+    <a class="toc-link sub" href="#prohibited" onclick="closeMobile()">Prohibited uses</a>
+    <a class="toc-link sub" href="#vendor" onclick="closeMobile()">Vendor selection</a>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Part III: Coordination</div>
+    <a class="toc-link" href="#coordination" onclick="closeMobile()">The coordination problem</a>
+    <a class="toc-link sub" href="#data-flow" onclick="closeMobile()">Data flow governance</a>
+    <a class="toc-link sub" href="#data-quality" onclick="closeMobile()">Data quality management</a>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Part IV: Bias &amp; Fairness</div>
+    <a class="toc-link" href="#why-fairness-fails" onclick="closeMobile()">Why standard fairness fails</a>
+    <a class="toc-link" href="#five-biases" onclick="closeMobile()">Five conflict-specific biases</a>
+    <a class="toc-link sub" href="#structural-fairness" onclick="closeMobile()">Structural fairness</a>
+    <a class="toc-link sub" href="#fairness-checklist" onclick="closeMobile()">Fairness audit checklist</a>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Part V: Implementation</div>
+    <a class="toc-link" href="#roles" onclick="closeMobile()">Roles &amp; responsibilities</a>
+    <a class="toc-link sub" href="#decision-tree" onclick="closeMobile()">Decision tree</a>
+    <a class="toc-link sub" href="#training" onclick="closeMobile()">Training requirements</a>
+    <a class="toc-link sub" href="#incident" onclick="closeMobile()">Incident response</a>
+    <a class="toc-link sub" href="#roadmap" onclick="closeMobile()">Roadmap</a>
+  </div>
+  <div class="toc-section">
+    <div class="toc-heading">Appendices</div>
+    <a class="toc-link" href="#glossary" onclick="closeMobile()">Glossary</a>
+    <a class="toc-link" href="#quick-ref" onclick="closeMobile()">Quick-reference card</a>
+    <a class="toc-link" href="#frameworks" onclick="closeMobile()">Existing frameworks</a>
+    <a class="toc-link" href="#references" onclick="closeMobile()">References</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="index.html">&#8592; Back to interactive site</a>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- ====== PREAMBLE ====== -->
+<div class="chapter" id="why">
+  <div class="chapter-num">Preamble</div>
+  <h1>Why This Protocol Exists</h1>
+  <p><strong>93% of humanitarian professionals already use AI tools for work.</strong> But the presence of AI policy remains at 22% (HLA &amp; DFS, 2025). This gap means sensitive patient data from conflict zones is being processed through commercial LLM APIs without institutional safeguards, risk assessment, or bias auditing.</p>
+  <p>This protocol does not aim to restrict AI use - that ship has sailed. It aims to make AI <strong>safe, auditable, and fair</strong> in contexts where data mishandling can endanger lives, and where data itself is structurally biased by the conditions of its collection.</p>
+  <p>The protocol addresses three interdependent problems:</p>
+  <div class="arch-grid">
+    <div class="arch-card arch-a"><h4>Confidentiality</h4><p>Patient data from conflict zones carries extreme risk if exposed</p></div>
+    <div class="arch-card arch-b"><h4>Coordination</h4><p>Humanitarian data flows through multiple actors, systems, and jurisdictions</p></div>
+    <div class="arch-card arch-c"><h4>Fairness</h4><p>Conflict-zone data is subject to bias mechanisms absent from standard literature</p></div>
+  </div>
+  <div class="callout callout-purple">
+    <div class="callout-title" style="color:var(--purple)">Scope</div>
+    <p style="margin:0">Humanitarian medical organizations operating in conflict-affected and resource-limited settings. Builds on: OCHA Data Responsibility Guidelines (2025), IASC Operational Guidance (2021), MSF Data Sharing Policy (2013), ICRC Professional Standards for Protection Work.</p>
+  </div>
+</div>
+
+<!-- ====== PART I ====== -->
+<div class="chapter" id="tiers">
+  <div class="chapter-num">Part I: Data Classification</div>
+  <h1>Sensitivity Tiers</h1>
+  <p>Not all data requires the same protections. Sensitivity in humanitarian contexts is determined not only by what the data contains but by the <strong>context in which it was collected</strong> and what its exposure could enable (Akinci D'Antonoli et al., 2025).</p>
+
+  <div class="tier-grid">
+    <div class="tier-card">
+      <h4><span class="tier-dot" style="background:var(--green)"></span> Tier 0 - Public aggregate</h4>
+      <p>Published situation reports, aggregate case counts, program summaries. Already in the public domain.</p>
+      <p><strong style="color:var(--green)">LLM use: unrestricted.</strong></p>
+    </div>
+    <div class="tier-card">
+      <h4><span class="tier-dot" style="background:var(--green-light)"></span> Tier 1 - Operational non-personal</h4>
+      <p>Supply chain data, logistics, drug stocks, facility capacity. Non-personal but potentially operationally sensitive.</p>
+      <p><strong style="color:var(--green)">LLM use: APIs permitted</strong> after stripping geographic identifiers that could reveal protected facility locations.</p>
+    </div>
+    <div class="tier-card">
+      <h4><span class="tier-dot" style="background:var(--orange)"></span> Tier 2 - Aggregate health data</h4>
+      <p>Aggregated case counts, attack rates, coverage estimates from DHIS2. No individual records, but small populations can be re-identifiable.</p>
+      <p><strong style="color:var(--orange)">LLM use: zero-retention APIs ONLY.</strong> Small denominator test required (n &lt; 15 = suppress).</p>
+    </div>
+    <div class="tier-card">
+      <h4><span class="tier-dot" style="background:var(--red)"></span> Tier 3 - Individual patient data</h4>
+      <p>Patient records, clinical narratives, lab results. Anything from which an individual could be re-identified.</p>
+      <p><strong style="color:var(--red)">LLM use: NEVER transmit to external APIs.</strong> Local models only.</p>
+    </div>
+  </div>
+  <div class="callout callout-red">
+    <div class="callout-title" style="color:var(--red)">Tier 4 - Protection-sensitive</div>
+    <p style="margin:0">Data whose exposure could lead to violence, persecution, or targeting. Includes: locations of medical facilities in active conflict, ethnicity/tribal affiliation, sexual violence data, data identifying patients treated for conflict-related injuries. <strong>NEVER transmit externally under any circumstances.</strong> Local processing only. Access-logged and encrypted at rest.</p>
+  </div>
+
+  <h2 id="context-sensitivity">Context-Dependent Sensitivity</h2>
+  <p>The same data can change sensitivity tiers based on context:</p>
+  <table>
+    <tr><th>Data</th><th>Stable context</th><th>Conflict context</th></tr>
+    <tr><td>Malaria case counts</td><td>Tier 1</td><td><strong style="color:var(--red)">Tier 4</strong> (ethnic targeting along disease-prevalence lines)</td></tr>
+    <tr><td>Facility location</td><td>Tier 1</td><td><strong style="color:var(--red)">Tier 4</strong> (health facilities being attacked)</td></tr>
+  </table>
+  <div class="callout callout-orange">
+    <div class="callout-title" style="color:var(--orange)">Rule</div>
+    <p style="margin:0">When in doubt, classify one tier higher. Reclassify periodically as context evolves.</p>
+  </div>
+</div>
+
+<!-- ====== PART II ====== -->
+<div class="chapter" id="core-principle">
+  <div class="chapter-num">Part II: LLM Use</div>
+  <h1>Permitted Operations and Safeguards</h1>
+  <p>The primary risk is not "using LLMs" - it is <strong>sending identifiable or sensitive data to systems where retention, training, and jurisdiction are outside organizational control</strong>.</p>
+  <p>The first question for any LLM interaction is not <em>which model</em> but <strong>what the model is allowed to see</strong>.</p>
+
+  <h2 id="architectures">Three Architectures</h2>
+  <div class="arch-grid">
+    <div class="arch-card arch-a">
+      <h4>Architecture A</h4>
+      <p>LLM builds tools. You run them locally. AI never sees real data.</p>
+      <p style="margin-top:8px"><strong style="color:var(--green)">All tiers &#10003;</strong></p>
+    </div>
+    <div class="arch-card arch-b">
+      <h4>Architecture B</h4>
+      <p>LLM sees de-identified or aggregated data. Zero-retention API.</p>
+      <p style="margin-top:8px"><strong style="color:var(--purple)">Tier 0, 1, 2</strong></p>
+    </div>
+    <div class="arch-card arch-c">
+      <h4>Architecture C</h4>
+      <p>Local open-weights model. Data never leaves your network.</p>
+      <p style="margin-top:8px"><strong style="color:var(--orange)">All tiers &#10003; (needs hardware)</strong></p>
+    </div>
+  </div>
+
+  <div class="callout callout-green">
+    <div class="callout-title" style="color:var(--green)">Architecture A - Example</div>
+    <p style="margin:0">Use an LLM to generate a parameterized R script for cohort analysis of TB treatment outcomes. The LLM sees the variable names and analysis logic. Field staff run the script locally on their actual DHIS2 data.</p>
+  </div>
+  <div class="callout callout-purple">
+    <div class="callout-title" style="color:var(--purple)">Architecture B - Example</div>
+    <p style="margin:0">Sending a table of weekly aggregated case counts by district (all cells n &#8805; 15) to an API for trend analysis.</p>
+  </div>
+  <div class="callout callout-orange">
+    <div class="callout-title" style="color:var(--orange)">Architecture C - Limitation</div>
+    <p style="margin:0">Smaller models are less capable; validated performance on the specific clinical domain must be demonstrated before deployment.</p>
+  </div>
+
+  <h2 id="deid-standard">De-identification Standard (Architecture B)</h2>
+  <p>Before data can be transmitted to any external LLM service:</p>
+  <table>
+    <tr><th>Step</th><th>Action</th></tr>
+    <tr><td>1</td><td>Remove all 18 HIPAA identifiers (as a minimum baseline)</td></tr>
+    <tr><td>2</td><td>Small denominator test: any cell with n &lt; 15 must be suppressed or combined</td></tr>
+    <tr><td>3</td><td>Strip geographic precision below the level at which population exceeds 20,000</td></tr>
+    <tr><td>4</td><td>Remove temporal precision below the level at which re-identification risk is negligible</td></tr>
+    <tr><td>5</td><td>Motivated-intruder test: could someone with local knowledge re-identify individuals?</td></tr>
+    <tr><td>6</td><td>Document the de-identification steps in a log retained alongside analysis results</td></tr>
+  </table>
+
+  <h2 id="prohibited">Prohibited Uses</h2>
+  <div class="callout callout-red">
+    <p style="margin:0"><strong>Regardless of architecture:</strong> Never use LLMs to make autonomous clinical decisions. Never classify patients by protected characteristics. Never use LLM outputs as evidence in legal proceedings or advocacy without independent verification. Never generate synthetic patient data without expert review.</p>
+  </div>
+
+  <h2 id="vendor">LLM Vendor Selection Criteria</h2>
+  <p>When commercial LLM APIs are used (Tiers 0-2 only):</p>
+  <table>
+    <tr><th>Criterion</th><th>Requirement</th></tr>
+    <tr><td>Data retention</td><td>Zero-retention policy (data not stored after processing)</td></tr>
+    <tr><td>Training exclusion</td><td>Organizational data explicitly excluded from model training</td></tr>
+    <tr><td>Data jurisdiction</td><td>Processing occurs in a jurisdiction with adequate data protection laws, AND not party to the conflict</td></tr>
+    <tr><td>Audit trail</td><td>API logs available to the organization</td></tr>
+    <tr><td>Encryption</td><td>TLS 1.2+ in transit, encryption at rest during processing</td></tr>
+    <tr><td>Sub-processor transparency</td><td>Full list of sub-processors available on request</td></tr>
+    <tr><td>Incident notification</td><td>Contractual obligation to notify within 72 hours of a data breach</td></tr>
+  </table>
+</div>
+
+<!-- ====== PART III ====== -->
+<div class="chapter" id="coordination">
+  <div class="chapter-num">Part III: Coordination</div>
+  <h1>Coordination and Data Management</h1>
+  <p>Humanitarian health data flows through a complex multi-actor ecosystem: within the organization (field to coordination to HQ), between organizations (cluster coordination, joint assessments), and between the organization and external parties (Ministries of Health, WHO, donors).</p>
+  <p><strong>Each handoff is a potential point of sensitivity escalation and a potential point of bias introduction.</strong></p>
+
+  <h2 id="data-flow">Data Flow Governance</h2>
+  <p>For every data flow involving AI/LLM processing, document the <strong>"5W+H of data flow"</strong>:</p>
+  <table>
+    <tr><th>Question</th><th>Document</th></tr>
+    <tr><td>What</td><td>Data classification tier, variables, volume</td></tr>
+    <tr><td>Where</td><td>Systems, jurisdictions, architectures (from and to)</td></tr>
+    <tr><td>Who</td><td>Named individual with appropriate authority</td></tr>
+    <tr><td>Why</td><td>Specific analytical question it answers</td></tr>
+    <tr><td>When</td><td>One-time, recurring, triggered by what event</td></tr>
+    <tr><td>How</td><td>Encryption, de-identification, access controls</td></tr>
+  </table>
+
+  <h3>Integration Rules</h3>
+  <p>AI-assisted outputs must be <strong>reconcilable with routine DHIS2/surveillance outputs</strong>. If an LLM-based trend analysis contradicts the routine epi report, the discrepancy must be investigated before either is acted upon.</p>
+  <p>AI-generated summaries must cite the underlying data source, variables, and time period. The epidemiologist must be able to reproduce the analysis without the LLM.</p>
+  <p><strong>AI tools supplement, never replace, the field epidemiologist's judgment. The epidemiologist signs the report, not the model.</strong></p>
+
+  <h2 id="data-quality">Data Quality Management in Degraded Conditions</h2>
+  <p>Before any analytical tool is applied, assess data quality along four dimensions:</p>
+  <div class="tier-grid">
+    <div class="tier-card"><h4>Completeness</h4><p>What fraction of expected records exist? What is missing and why?</p></div>
+    <div class="tier-card"><h4>Consistency</h4><p>Do the same events get the same coding? Same case definition across sites?</p></div>
+    <div class="tier-card"><h4>Timeliness</h4><p>Lag between event and recording? Between recording and availability?</p></div>
+    <div class="tier-card"><h4>Representativeness</h4><p>Who is in the data and who is not?</p></div>
+  </div>
+  <div class="callout callout-orange">
+    <div class="callout-title" style="color:var(--orange)">Minimum viable data quality for LLM-assisted analysis</div>
+    <p style="margin:0">Completeness &gt; 70% for variables of interest. Consistent case definitions across the analysis period. Lag documented. Known biases in representativeness explicitly stated. If these thresholds are not met, the appropriate output is not an analysis but a <strong>data quality assessment</strong> - and this is itself a valuable output.</p>
+  </div>
+</div>
+
+<!-- ====== PART IV ====== -->
+<div class="chapter" id="why-fairness-fails">
+  <div class="chapter-num">Part IV: Bias &amp; Fairness</div>
+  <h1>Why Standard Algorithmic Fairness Fails in Conflict Settings</h1>
+  <p>Standard algorithmic fairness (Hedden, 2021; Dolata et al., 2022; Kreutzer et al., 2025) assumes:</p>
+  <div class="callout callout-purple">
+    <p style="margin:0">Data exists for the populations of interest. Protected attributes are known and measurable. The data-generating process is approximately stationary. Missingness is at worst Missing-at-Random (MAR). <strong>In humanitarian conflict settings, none of these assumptions hold.</strong></p>
+  </div>
+
+  <h2 id="five-biases">Five Conflict-Specific Bias Mechanisms</h2>
+  <div class="bias-list">
+    <div class="bias-item">
+      <h4>1. Survivorship / Access Bias</h4>
+      <p>Only people who reach a health facility enter the dataset. Reaching the facility requires surviving, being mobile, having transport, passing checkpoints, and the facility still being operational.</p>
+      <div class="mitigation"><strong>Mitigation:</strong>
+        <ul>
+          <li>Always report with an explicit "accessibility caveat"</li>
+          <li>Triangulate with community-based data, remote sensing, or population-movement estimates</li>
+          <li>Apply capture-recapture reasoning where multiple sources exist</li>
+          <li>Never present facility-based attack rates as population-based without adjustment</li>
+        </ul>
+      </div>
+    </div>
+    <div class="bias-item">
+      <h4>2. Conflict-Topology Bias</h4>
+      <p>Front lines, checkpoints, besieged areas create a non-random partition of the population into "observable" and "unobservable" subgroups that correlates with conflict exposure.</p>
+      <div class="mitigation"><strong>Mitigation:</strong>
+        <ul>
+          <li>Map the accessibility structure explicitly</li>
+          <li>Weight by estimated catchment population, not facility reporting volume</li>
+          <li>Flag when results may be driven by accessibility patterns rather than true health differences</li>
+        </ul>
+      </div>
+    </div>
+    <div class="bias-item">
+      <h4>3. Temporal Non-Stationarity</h4>
+      <p>A hospital is bombed, a population is displaced, a water system is destroyed. Models trained on pre-event data may be invalid post-event. The model won't tell you it's wrong.</p>
+      <div class="mitigation"><strong>Mitigation:</strong>
+        <ul>
+          <li>Tag all data with conflict-phase metadata</li>
+          <li>Declare a "model validity horizon"</li>
+          <li>After major conflict events, treat all pre-event models as requiring revalidation</li>
+        </ul>
+      </div>
+    </div>
+    <div class="bias-item">
+      <h4>4. MNAR as the Default Condition</h4>
+      <p>In conflict, missingness is informative: data is missing because the facility was attacked, the patient died before admission, the area is too dangerous. Standard imputation methods assume MAR and produce confident wrong answers.</p>
+      <div class="mitigation"><strong>Mitigation:</strong>
+        <ul>
+          <li>Document the reason for missingness alongside the missing value</li>
+          <li>Use sensitivity analyses under different assumptions</li>
+          <li>Never use LLMs to impute missing health data without expert epi review</li>
+          <li>Report missingness rates prominently alongside all results</li>
+        </ul>
+      </div>
+    </div>
+    <div class="bias-item">
+      <h4>5. The Protected Attribute Paradox</h4>
+      <p>The most fairness-relevant attribute may be one that cannot be safely collected - ethnicity in an ethnic conflict, tribal affiliation, displacement status. Recording such attributes in medical records could endanger patients.</p>
+      <div class="mitigation"><strong>Mitigation:</strong>
+        <ul>
+          <li>Use ecological proxies where safe (geographic catchment as proxy for conflict-side)</li>
+          <li>Apply group fairness metrics at facility/district level, not individual protected attributes</li>
+          <li>Conduct retrospective audits after sufficient anonymization by time lag</li>
+          <li>Never collect conflict-sensitive attributes "for analysis purposes"</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h2 id="structural-fairness">The Structural Fairness Layer</h2>
+  <p>Algorithmic fairness operates at the level of model outputs. But <strong>structural fairness</strong> - fairness in how data systems are designed, who has access, whose questions get asked - is equally important.</p>
+  <div class="bias-list">
+    <div class="bias-item" style="border-left-color:var(--orange)">
+      <h4>Whose questions does the tool answer?</h4>
+      <p>If the tool answers coordination-level questions but not facility-level questions, it structurally privileges HQ decision-making over clinical reality.</p>
+    </div>
+    <div class="bias-item" style="border-left-color:var(--orange)">
+      <h4>Who can access the tool?</h4>
+      <p>If LLM-assisted analysis requires English, internet, and a laptop, it is inaccessible to the majority of national staff who have the most contextual knowledge.</p>
+    </div>
+    <div class="bias-item" style="border-left-color:var(--orange)">
+      <h4>Whose data is legible to the tool?</h4>
+      <p>DHIS2 data from well-equipped facilities is machine-readable. Paper tally sheets from mobile clinics are not. The tool structurally renders invisible the most conflict-affected programs.</p>
+    </div>
+    <div class="bias-item" style="border-left-color:var(--orange)">
+      <h4>Who validates the outputs?</h4>
+      <p>If outputs are validated only by HQ-based analysts who have never visited the context, validation cannot catch errors requiring local knowledge.</p>
+    </div>
+    <div class="bias-item" style="border-left-color:var(--orange)">
+      <h4>Who benefits?</h4>
+      <p>If the tool improves reporting efficiency but not patient care, it extracts data value upward without returning value downward.</p>
+    </div>
+  </div>
+
+  <h2 id="fairness-checklist">Fairness Audit Checklist</h2>
+  <p>Before deploying any analytical tool on humanitarian health data:</p>
+  <div class="checklist">
+    <div class="checklist-item"><div class="checklist-box"></div><div>Accessibility bias assessment: which populations are and are not represented?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>Conflict-topology assessment: does the analysis span different accessibility zones?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>Temporal validity: does the data span a major conflict-phase change?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>MNAR assessment: is missingness likely informative? Are sensitivity analyses included?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>Protected attribute review: are there fairness-relevant attributes that cannot be collected?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>Structural fairness review: who designed the question? Who validated? Does value return to the field?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>Small-denominator check: could any output enable re-identification?</div></div>
+    <div class="checklist-item"><div class="checklist-box"></div><div>Model validity horizon declared: what events would invalidate this analysis?</div></div>
+  </div>
+</div>
+
+<!-- ====== PART V ====== -->
+<div class="chapter" id="roles">
+  <div class="chapter-num">Part V: Implementation</div>
+  <h1>Making This Operational</h1>
+
+  <h3>Roles and Responsibilities</h3>
+  <table>
+    <tr><th>Role</th><th>Responsibility</th></tr>
+    <tr><td>Medical Coordinator</td><td>Authorizes Tier 2+ data flows; approves analytical questions</td></tr>
+    <tr><td>Field Epidemiologist / Data Manager</td><td>Data quality assessments; runs analyses; validates outputs; completes fairness checklist</td></tr>
+    <tr><td>Data Protection Focal Point</td><td>Reviews data flow documentation; conducts motivated-intruder test; escalates incidents</td></tr>
+    <tr><td>HQ Data/Analytics Team</td><td>Maintains approved tool list; provides Architecture A templates; supports Architecture C</td></tr>
+    <tr><td>LuxOR / Epicentre (or equivalent)</td><td>Methodological review; validates fairness audit methodology</td></tr>
+  </table>
+
+  <h2 id="decision-tree">Decision Tree for LLM Use</h2>
+  <div class="decision-tree"><strong>START:</strong> You want to use an LLM for a task involving organizational data.
+  |
+  +-- Does the task involve any patient-level data?
+  |   +-- <strong>YES</strong> -- Can you accomplish it using ONLY de-identified/aggregated data?
+  |   |         +-- <strong>YES</strong> -- Apply de-identification standard (Section 2.2)
+  |   |         |         -- Use Architecture B with zero-retention API
+  |   |         |         -- Complete fairness checklist
+  |   |         +-- <strong>NO</strong>  -- Is local model infrastructure available?
+  |   |                   +-- <strong>YES</strong> -- Use Architecture C (local model)
+  |   |                   +-- <strong>NO</strong>  -- Use Architecture A (LLM generates tools)
+  |   |                             -- Process real data locally without LLM
+  |   +-- <strong>NO</strong> -- What tier is the data?
+  |           +-- Tier 0-1: Commercial API permitted
+  |           +-- Tier 2: Zero-retention API only + small-denominator test
+  |
+  +-- Does the task involve ONLY public or reference data?
+      +-- <strong>YES</strong> -- Unrestricted LLM use. No special documentation required.</div>
+
+  <h2 id="training">Training Requirements</h2>
+  <table>
+    <tr><th>Audience</th><th>Duration</th><th>Content</th></tr>
+    <tr><td>All staff using LLM tools</td><td>30 min + annual refresher</td><td>Data classification, what never goes into a commercial LLM, recognizing patient-identifiable information in aggregated data</td></tr>
+    <tr><td>Epidemiologists &amp; data managers</td><td>2 hours</td><td>Full protocol, de-identification procedures, fairness checklist, data quality assessment. Practical exercise: complete a fairness audit on a realistic scenario</td></tr>
+    <tr><td>Medical coordinators</td><td>1 hour</td><td>When to authorize AI-assisted analysis, interpreting AI-assisted outputs, red flags for biased results</td></tr>
+  </table>
+
+  <h2 id="incident">Incident Response</h2>
+  <p>If patient-identifiable data or Tier 4 data is inadvertently transmitted to an external LLM:</p>
+  <table>
+    <tr><th>Timeline</th><th>Action</th></tr>
+    <tr><td>Immediately</td><td>Document what was sent, to which service, and when</td></tr>
+    <tr><td>4 hours</td><td>Notify data protection focal point or medical coordinator</td></tr>
+    <tr><td>24 hours</td><td>Contact LLM provider to request deletion</td></tr>
+    <tr><td>72 hours</td><td>Assess re-identification risk; decide on notification</td></tr>
+    <tr><td>2 weeks</td><td>Complete incident report with root cause analysis</td></tr>
+  </table>
+
+  <h2 id="roadmap">Roadmap</h2>
+  <table>
+    <tr><th>Phase</th><th>Timeline</th><th>Deliverables</th></tr>
+    <tr><td>1. Foundation</td><td>0-6 months</td><td>Protocol, e-learning module, approved vendor list, pilot in 3-5 missions</td></tr>
+    <tr><td>2. Integration</td><td>6-18 months</td><td>DHIS2 workflow integration, Architecture A template library, field epi training</td></tr>
+    <tr><td>3. Advanced</td><td>18-36 months</td><td>Architecture C pilot, conflict-specific fairness metrics, federated learning exploration</td></tr>
+    <tr><td>4. Field of practice</td><td>36+ months</td><td>Fairness auditing in standard operational research, published framework</td></tr>
+  </table>
+</div>
+
+<!-- ====== APPENDICES ====== -->
+<div class="chapter" id="glossary">
+  <div class="chapter-num">Appendices</div>
+  <h1>Glossary</h1>
+  <table>
+    <tr><th>Term</th><th>Definition</th></tr>
+    <tr><td>Architecture A/B/C</td><td>The three permitted configurations for LLM use, defined by what data the model can access</td></tr>
+    <tr><td>Small denominator test</td><td>Check whether any reported cell has n &lt; 15, enabling re-identification</td></tr>
+    <tr><td>Motivated intruder test</td><td>Assessment of whether someone with local knowledge and hostile intent could re-identify individuals</td></tr>
+    <tr><td>Model validity horizon</td><td>The stated conditions and time period during which a model's conclusions remain reliable</td></tr>
+    <tr><td>Conflict-topology bias</td><td>Systematic distortion caused by the geographic and political structure of access in a conflict</td></tr>
+  </table>
+</div>
+
+<div class="chapter" id="quick-ref">
+  <h1>Quick-Reference Card</h1>
+  <div class="quick-ref">
+    <h4 style="color:var(--red)">Never send to a commercial LLM</h4>
+    <ul>
+      <li>Patient names, dates of birth, or any direct identifiers</li>
+      <li>Clinical narratives or consultation notes</li>
+      <li>GPS coordinates of patients or field facilities in active conflict</li>
+      <li>Data on sexual violence, ethnicity in ethnic conflict, or combatant status</li>
+      <li>Any dataset where a subgroup has fewer than 15 individuals</li>
+    </ul>
+    <h4 style="color:var(--green)">Always document</h4>
+    <ul>
+      <li>What data was sent, to which service, for what purpose</li>
+      <li>What de-identification steps were taken</li>
+      <li>What fairness biases may affect the analysis</li>
+      <li>What the model validity horizon is</li>
+    </ul>
+    <h4 style="color:var(--purple)">Always ask</h4>
+    <ul>
+      <li>"Who is NOT in this data?"</li>
+      <li>"What changed in the conflict since this data was collected?"</li>
+      <li>"Would someone with local knowledge be able to identify a person from this output?"</li>
+    </ul>
+  </div>
+</div>
+
+<div class="chapter" id="frameworks">
+  <h1>Existing Frameworks This Protocol Extends</h1>
+  <table>
+    <tr><th>Framework</th><th>Covers</th><th>This protocol adds</th></tr>
+    <tr><td>OCHA Data Responsibility Guidelines (2025)</td><td>Principles for safe, ethical data management</td><td>LLM-specific risk classification, vendor requirements</td></tr>
+    <tr><td>IASC Operational Guidance (2021)</td><td>Inter-agency data responsibility standards</td><td>Algorithmic fairness framework for conflict data</td></tr>
+    <tr><td>MSF Data Sharing Policy (2013)</td><td>When and how to share MSF-collected health data</td><td>Decision tree for LLM architectures, prohibited uses</td></tr>
+    <tr><td>ICRC Professional Standards</td><td>Data protection in protection programming</td><td>Conflict-specific bias taxonomy, structural fairness</td></tr>
+    <tr><td>EU AI Act / NIST AI RMF</td><td>General AI governance</td><td>Adaptation for humanitarian operational constraints</td></tr>
+  </table>
+</div>
+
+<div class="chapter" id="references">
+  <h1>References</h1>
+  <div class="ref-list">
+    <div class="ref-item">Akinci D'Antonoli, T., et al. (2025). Cybersecurity threats and mitigation strategies for large language models in health care. <em>Radiology: Artificial Intelligence, 7</em>(4). https://doi.org/10.1148/ryai.240739</div>
+    <div class="ref-item">Centre for Humanitarian Data. (2025). Data responsibility guidelines (January 2025 edition). OCHA. https://reliefweb.int/report/world/data-responsibility-guidelines-january-2025</div>
+    <div class="ref-item">Chu, Z., Wang, Z., &amp; Zhang, W. (2024). Fairness in large language models: A taxonomic survey. <em>arXiv</em>. https://doi.org/10.48550/arXiv.2404.01349</div>
+    <div class="ref-item">Croix-Rouge fran&ccedil;aise. (2022, January 28). Cyber security incident and data breach affecting data hosted by ICRC servers.</div>
+    <div class="ref-item">Dolata, M., Feuerriegel, S., &amp; Schwabe, G. (2022). A sociotechnical view of algorithmic fairness. <em>Information Systems Journal, 32</em>(4), 754-818.</div>
+    <div class="ref-item">European Parliament &amp; Council of the European Union. (2024). Regulation (EU) 2024/1689 (Artificial Intelligence Act). <em>Official Journal of the European Union</em>.</div>
+    <div class="ref-item">Hedden, B. (2021). Algorithmic fairness. In E. N. Zalta (Ed.), <em>Stanford Encyclopedia of Philosophy</em>.</div>
+    <div class="ref-item">Humanitarian Leadership Academy &amp; Data Friendly Space. (2025). How are humanitarians using artificial intelligence in 2025? Initial insights report.</div>
+    <div class="ref-item">Inter-Agency Standing Committee. (2021). IASC operational guidance on data responsibility in humanitarian action.</div>
+    <div class="ref-item">International Committee of the Red Cross. (2024). Professional standards for protection work (4th ed.). ICRC.</div>
+    <div class="ref-item">Karunakara, U. (2013). Data sharing in a humanitarian organization: The experience of M&eacute;decins Sans Fronti&egrave;res. <em>PLOS Medicine, 10</em>(12), e1001562.</div>
+    <div class="ref-item">Kreutzer, T., et al. (2025). Ethical implications related to processing of personal data and artificial intelligence in humanitarian crises: A scoping review. <em>BMC Medical Ethics, 26</em>, 70.</div>
+    <div class="ref-item">National Institute of Standards and Technology. (2023). Artificial intelligence risk management framework (AI RMF 1.0). NIST AI 100-1.</div>
+    <div class="ref-item">Rocca, R., et al. (2023). Natural language processing for humanitarian action. <em>Frontiers in Big Data, 6</em>, 1082787.</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+function closeMobile() { document.querySelector('.sidebar').classList.remove('open'); }
+const links = document.querySelectorAll('.toc-link');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const id = e.target.id;
+      const active = document.querySelector('.toc-link[href="#' + id + '"]');
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -75% 0px' });
+document.querySelectorAll('.chapter, h2[id], h3[id]').forEach(s => { if (s.id) observer.observe(s); });
+</script>
+</body>
+</html>
